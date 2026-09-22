@@ -1,0 +1,22 @@
+{
+  "revision": 0,
+  "tripName": "Bro-Am Live Golf",
+  "holes": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],
+  "holeStrokeIndex": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],
+  "scrambleHandicap": {"lowerPct": 35, "higherPct": 15},
+  "players": [
+    {"id":"p1","name":"Matthew Syfrett","handicap":7.3},
+    {"id":"p2","name":"Keyton Vaughn","handicap":8.2},
+    {"id":"p3","name":"Bryce Melear","handicap":7.4},
+    {"id":"p4","name":"Adam Vigneri","handicap":7.3},
+    {"id":"p5","name":"Drew Shedd","handicap":15.1},
+    {"id":"p6","name":"Alex Matthews","handicap":7.9},
+    {"id":"p7","name":"Lane Smoak","handicap":4.1},
+    {"id":"p8","name":"Frazier Farrell","handicap":3.8}
+  ],
+  "teams": {
+    "bestball": [["p1","p2"],["p3","p4"],["p5","p6"],["p7","p8"]],
+    "scramble": [["p1","p2"],["p3","p4"],["p5","p6"],["p7","p8"]]
+  },
+  "scores": {"bestball": {}, "individual1": {}, "scramble": {}, "individual3": {}}
+}
