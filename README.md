@@ -15,3 +15,5 @@ Run locally with:
 `npm start`
 
 The app serves on PORT (default 3000) and exposes /api/trip, /api/scores, /api/reset-scores.
+
+Deployment trigger: Express 5 route compatibility fix.
