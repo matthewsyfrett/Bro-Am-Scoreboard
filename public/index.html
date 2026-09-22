@@ -27,20 +27,46 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 7px;border-bottom:1p
 <main class="wrap"><section id="board"></section><section id="scores" hidden></section><section id="setup" hidden></section></main>
 <script>
 var trip=null,view="board",game="bestball";
+function dayCourse(day){return trip.courses&&trip.courses[day]||{name:"",par:Array(18).fill(4),strokeIndex:Array.from({length:18},function(_,i){return i+1})}}
+function normalizeTrip(x){
+  x=x||{};
+  var defaultPar=Array(18).fill(4),defaultSI=Array.from({length:18},function(_,i){return i+1});
+  x.courses=x.courses||{};
+  ["day1","day2","day3"].forEach(function(day){
+    var oldPar=Array.isArray(x.holePar)?x.holePar:defaultPar;
+    var oldSI=Array.isArray(x.holeStrokeIndex)?x.holeStrokeIndex:defaultSI;
+    x.courses[day]=x.courses[day]||{};
+    x.courses[day].name=x.courses[day].name||"";
+    x.courses[day].par=Array.isArray(x.courses[day].par)?x.courses[day].par:oldPar.slice();
+    x.courses[day].strokeIndex=Array.isArray(x.courses[day].strokeIndex)?x.courses[day].strokeIndex:oldSI.slice();
+  });
+  (x.players||[]).forEach(function(p){
+    p.courseHandicap=p.courseHandicap||{};
+    ["day1","day2","day3"].forEach(function(day){
+      if(p.courseHandicap[day]==null)p.courseHandicap[day]=Math.round(Number(p.handicap)||0);
+    });
+  });
+  x.holePar=x.courses.day1.par.slice();
+  x.holeStrokeIndex=x.courses.day1.strokeIndex.slice();
+  return x;
+}
+
 var gameNames={bestball:"Day 1 · Best Ball",individual1:"Day 1 · Individual",scramble:"Day 2 · Scramble",individual3:"Day 3 · Individual"};
 function blank(){return Array(18).fill(null)}
 function player(id){return trip.players.find(function(p){return p.id===id})}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]})}
-function strokesOnHole(hcp,i){var hc=Math.round(Math.max(0,Number(hcp)||0)),si=Number(trip.holeStrokeIndex&&trip.holeStrokeIndex[i]||i+1),base=Math.floor(hc/18),extra=hc%18;return base+(si<=extra?1:0)}
-function netScore(gross,hcp,i){return Number(gross)-strokesOnHole(hcp,i)}
-function individualTotal(id,g){var a=(trip.scores[g]&&trip.scores[g][id])||blank();if(!a.some(function(v){return v!=null}))return null;var p=player(id);return a.reduce(function(s,v,i){return s+(v==null?0:netScore(v,p.handicap,i))},0)}
-function bestBallTotal(team,i){var total=0;for(var h=0;h<18;h++){var best=null;for(var j=0;j<team.length;j++){var id=team[j],a=(trip.scores.bestball&&trip.scores.bestball["team"+(i+1)+"_"+id])||blank(),v=a[h];if(v!=null){var n=netScore(v,player(id).handicap,h);if(best===null||n<best)best=n}}if(best===null)return null;total+=best}return total}
-function scrambleHcp(team){var hs=team.map(function(id){return Number(player(id).handicap)||0}).sort(function(a,b){return a-b});var low=(trip.scrambleHandicap&&trip.scrambleHandicap.lowerPct)||35,high=(trip.scrambleHandicap&&trip.scrambleHandicap.higherPct)||15;return Math.round(hs[0]*low/100+hs[1]*high/100)}
-function scrambleTotal(team,i){var a=(trip.scores.scramble&&trip.scores.scramble["team"+(i+1)])||blank();if(!a.some(function(v){return v!=null}))return null;var hcp=scrambleHcp(team);return a.reduce(function(s,v,h){return s+(v==null?0:netScore(v,hcp,h))},0)}
+function courseKeyForGame(g){return g==="bestball"||g==="individual1"?"day1":g==="scramble"?"day2":"day3"}
+function playerCourseHcp(id,day){var p=player(id);return Number(p&&p.courseHandicap&&p.courseHandicap[day]!=null?p.courseHandicap[day]:p&&p.handicap)||0}
+function strokesOnHole(hcp,i,day){var hc=Math.round(Math.max(0,Number(hcp)||0)),si=Number(dayCourse(day).strokeIndex[i]||i+1),base=Math.floor(hc/18),extra=hc%18;return base+(si<=extra?1:0)}
+function netScore(gross,hcp,i,day){return Number(gross)-strokesOnHole(hcp,i,day)}
+function individualTotal(id,g){var day=courseKeyForGame(g),a=(trip.scores[g]&&trip.scores[g][id])||blank();if(!a.some(function(v){return v!=null}))return null;var total=0;for(var i=0;i<18;i++){if(a[i]!=null)total+=netScore(a[i],playerCourseHcp(id,day),i,day)}return total}
+function bestBallTotal(team,i){var total=0;for(var h=0;h<18;h++){var best=null;for(var j=0;j<team.length;j++){var id=team[j],a=(trip.scores.bestball&&trip.scores.bestball["team"+(i+1)+"_"+id])||blank(),v=a[h];if(v!=null){var n=netScore(v,playerCourseHcp(id,"day1"),h,"day1");if(best===null||n<best)best=n}}if(best===null)return null;total+=best}return total}
+function scrambleHcp(team){var hs=team.map(function(id){return playerCourseHcp(id,"day2")}).sort(function(a,b){return a-b});var low=(trip.scrambleHandicap&&trip.scrambleHandicap.lowerPct)||35,high=(trip.scrambleHandicap&&trip.scrambleHandicap.higherPct)||15;return Math.round(hs[0]*low/100+hs[1]*high/100)}
+function scrambleTotal(team,i){var a=(trip.scores.scramble&&trip.scores.scramble["team"+(i+1)])||blank();if(!a.some(function(v){return v!=null}))return null;var hcp=scrambleHcp(team),total=0;for(var h=0;h<18;h++){if(a[h]!=null)total+=netScore(a[h],hcp,h,"day2")}return total}
 function day2HolePoints(diff){if(diff<=-2)return 3;if(diff===-1)return 2;if(diff===0)return 1;if(diff===1)return -1;return -2}
-function scramblePointsTotal(team,i){var a=(trip.scores.scramble&&trip.scores.scramble["team"+(i+1)])||blank(),hcp=scrambleHcp(team),total=0,any=false;for(var h=0;h<18;h++){if(a[h]==null)continue;any=true;var par=Number(trip.holePar&&trip.holePar[h]||4),ns=netScore(a[h],hcp,h);total+=day2HolePoints(ns-par)}return any?total:null}
+function scramblePointsTotal(team,i){var a=(trip.scores.scramble&&trip.scores.scramble["team"+(i+1)])||blank(),hcp=scrambleHcp(team),course=dayCourse("day2"),total=0,any=false;for(var h=0;h<18;h++){if(a[h]==null)continue;any=true;var par=Number(course.par[h]||4),ns=netScore(a[h],hcp,h,"day2");total+=day2HolePoints(ns-par)}return any?total:null}
 function day3HolePoints(diff){if(diff<=-2)return 4;if(diff===-1)return 3;if(diff===0)return 2;if(diff===1)return 1;return 0}
-function individualPointsTotal(id){var a=(trip.scores.individual3&&trip.scores.individual3[id])||blank(),p=player(id),total=0,any=false;for(var h=0;h<18;h++){if(a[h]==null)continue;any=true;var par=Number(trip.holePar&&trip.holePar[h]||4),ns=netScore(a[h],p.handicap,h);total+=day3HolePoints(ns-par)}return any?total:null}
+function individualPointsTotal(id){var a=(trip.scores.individual3&&trip.scores.individual3[id])||blank(),total=0,any=false,course=dayCourse("day3");for(var h=0;h<18;h++){if(a[h]==null)continue;any=true;var par=Number(course.par[h]||4),ns=netScore(a[h],playerCourseHcp(id,"day3"),h,"day3");total+=day3HolePoints(ns-par)}return any?total:null}
 function leaderRows(g){var rows=[];if(g==="individual1"){rows=trip.players.map(function(p){return {id:p.id,name:p.name,h:p.handicap,score:individualTotal(p.id,g)}})}else if(g==="individual3"){rows=trip.players.map(function(p){return {id:p.id,name:p.name,h:p.handicap,score:individualTotal(p.id,g),points:individualPointsTotal(p.id)}})}else{var ts=trip.teams[g==="bestball"?"bestball":"scramble"];rows=ts.map(function(t,i){return {team:t,name:t.map(function(id){return player(id).name}).join(" / "),score:g==="bestball"?bestBallTotal(t,i):scrambleTotal(t,i),points:g==="scramble"?scramblePointsTotal(t,i):null}})}return rows}
 function placementPoints(g,i){if(g==="bestball")return [10,8,6,4][i]||0;if(g==="individual1")return [14,12,10,8,6,4,2,0][i]||0;return 0}
 function overallRows(){var out=trip.players.map(function(p){return {id:p.id,name:p.name,points:0}}),m={};out.forEach(function(x){m[x.id]=x});
@@ -65,21 +91,31 @@ else if(game==="bestball"){trip.teams.bestball.forEach(function(t,i){out+="<div 
 else{trip.teams.scramble.forEach(function(t,i){out+="<div class='card'><h3>Team "+(i+1)+" · "+esc(t.map(function(id){return player(id).name}).join(" / "))+" · Team HCP "+scrambleHcp(t)+"</h3>"+scoreRow("team"+(i+1),t.map(function(id){return player(id).name}).join(" / "),"scramble")+"</div>"})}
 document.getElementById("scores").innerHTML=out;document.querySelectorAll("#scores .rounds button").forEach(function(b){b.onclick=function(){game=b.dataset.game;render()}});document.querySelectorAll("#scores input[data-i]").forEach(function(el){el.onchange=function(){var g=el.dataset.g,k=el.dataset.k,i=Number(el.dataset.i);trip.scores[g]=trip.scores[g]||{};var a=trip.scores[g][k]||blank();a[i]=el.value===""?null:Number(el.value);save("/api/scores",{game:g,key:k,holes:a})}})}
 function teamEditor(kind){var out="<div class='teams'>";trip.teams[kind].forEach(function(t,i){out+="<div class='card'><b>Team "+(i+1)+"</b><div class='formgrid'>";[0,1].forEach(function(j){out+="<div class='field'><label>Golfer "+(j+1)+"</label><select data-team='"+kind+"' data-i='"+i+"' data-j='"+j+"'>"+trip.players.map(function(p){return "<option value='"+p.id+"' "+(p.id===t[j]?"selected":"")+">"+esc(p.name)+"</option>"}).join("")+"</select></div>"});out+="</div></div>"});return out+"</div><button class='btn' data-save-team='"+kind+"'>Save Teams</button>"}
-function renderSetup(){var out="<div class='card'><h2>Trip Setup</h2><div class='field'><label>Trip name</label><input id='tn' value='"+esc(trip.tripName)+"'></div><h3>Golfers</h3><div class='formgrid'>";trip.players.forEach(function(p){out+="<div class='field'><label>Name</label><input data-name='"+p.id+"' value='"+esc(p.name)+"'></div><div class='field'><label>Course handicap</label><input data-hcp='"+p.id+"' type='number' step='.1' value='"+p.handicap+"'></div>"});out+="</div><button class='btn primary' id='savePlayers' style='margin-top:12px'>Save Trip & Golfers</button></div>";
-out+="<div class='card'><h3>Best Ball Teams</h3>"+teamEditor("bestball")+"</div><div class='card'><h3>Scramble Teams</h3>"+teamEditor("scramble")+"</div>";
-out+="<div class='card'><h3>Course Stroke Index</h3><div class='formgrid'>";trip.holes.forEach(function(h,i){out+="<div class='field'><label>Hole "+h+"</label><input data-si='"+i+"' type='number' min='1' max='18' value='"+trip.holeStrokeIndex[i]+"'></div>"});out+="</div><button class='btn' id='saveSI'>Save Stroke Index</button></div>";
-out+="<div class='card'><h3>Hole Par</h3><div class='muted'>Day 2 points use net score versus par. Set these to the actual course pars.</div><div class='formgrid'>";trip.holes.forEach(function(h,i){out+="<div class='field'><label>Hole "+h+"</label><input data-par='"+i+"' type='number' min='3' max='6' value='"+((trip.holePar&&trip.holePar[i])||4)+"'></div>"});out+="</div><button class='btn' id='savePars'>Save Hole Pars</button></div>";
-out+="<div class='card'><h3>Scramble Handicap Formula</h3><div class='formgrid'><div class='field'><label>Lower HCP %</label><input id='lp' type='number' value='"+((trip.scrambleHandicap&&trip.scrambleHandicap.lowerPct)||35)+"'></div><div class='field'><label>Higher HCP %</label><input id='hp' type='number' value='"+((trip.scrambleHandicap&&trip.scrambleHandicap.higherPct)||15)+"'></div></div><button class='btn' id='saveFormula'>Save Formula</button></div>";
-out+="<div class='card'><button class='btn' id='resetScores' style='background:#fdecec;color:#a11'>Reset All Scores</button></div>";document.getElementById("setup").innerHTML=out;
-document.getElementById("savePlayers").onclick=function(){trip.tripName=document.getElementById("tn").value.trim()||"Bro-Am Live Golf";trip.players.forEach(function(p){p.name=document.querySelector("[data-name='"+p.id+"']").value.trim()||p.name;p.handicap=Number(document.querySelector("[data-hcp='"+p.id+"']").value)||0});save("/api/trip",trip)};
-document.querySelectorAll("[data-save-team]").forEach(function(b){b.onclick=function(){var kind=b.dataset.saveTeam;document.querySelectorAll("[data-team='"+kind+"']").forEach(function(s){trip.teams[kind][Number(s.dataset.i)][Number(s.dataset.j)]=s.value});save("/api/trip",trip)}});
-document.getElementById("saveSI").onclick=function(){trip.holeStrokeIndex=trip.holes.map(function(h,i){return Number(document.querySelector("[data-si='"+i+"']").value)||i+1});save("/api/trip",trip)};
-document.getElementById("savePars").onclick=function(){trip.holePar=trip.holes.map(function(h,i){return Number(document.querySelector("[data-par='"+i+"']").value)||4});save("/api/trip",trip)};
+function renderSetup(){
+var out="<div class='card'><h2>Trip Setup</h2><div class='field'><label>Trip name</label><input id='tn' value='"+esc(trip.tripName)+"'></div><button class='btn primary' id='saveTripName' style='margin-top:12px'>Save Trip Name</button></div>";
+out+="<div class='card'><h3>Golfers & Base Handicap Index</h3><div class='muted'>The base Handicap Index is your golfer's index. Enter a separate course handicap for each of the three courses below.</div><div class='formgrid'>";
+trip.players.forEach(function(p){out+="<div class='field'><label>Name</label><input data-name='"+p.id+"' value='"+esc(p.name)+"'></div><div class='field'><label>Handicap Index</label><input data-hidx='"+p.id+"' type='number' step='.1' value='"+p.handicap+"'></div>"});out+="</div><button class='btn' id='saveGolfers' style='margin-top:12px'>Save Golfers</button></div>";
+["day1","day2","day3"].forEach(function(day,di){
+  var course=dayCourse(day), title="Day "+(di+1), card="<div class='card'><h2>"+title+" Course</h2><div class='field'><label>Course Name</label><input data-coursename='"+day+"' value='"+esc(course.name)+"' placeholder='Enter course name'></div>";
+  card+="<h3 style='margin-top:16px'>Course Handicaps</h3><div class='formgrid'>";
+  trip.players.forEach(function(p){card+="<div class='field'><label>"+esc(p.name)+"</label><input data-ch='"+day+"-"+p.id+"' type='number' step='1' value='"+playerCourseHcp(p.id,day)+"'></div>"});
+  card+="</div><h3 style='margin-top:16px'>Hole Setup</h3><div class='scroll'><table class='score'><tr><th>Hole</th><th>Par</th><th>Hole Handicap Index</th></tr>";
+  trip.holes.forEach(function(h,i){card+="<tr><td><b>"+h+"</b></td><td><input data-par='"+day+"-"+i+"' type='number' min='3' max='6' value='"+Number(course.par[i]||4)+"'></td><td><input data-si='"+day+"-"+i+"' type='number' min='1' max='18' value='"+Number(course.strokeIndex[i]||i+1)+"'></td></tr>"});
+  card+="</table></div><button class='btn primary' data-save-course='"+day+"' style='margin-top:12px'>Save "+title+" Course</button></div>";
+  out+=card;
+});
+out+="<div class='card'><h3>Scramble Handicap Formula</h3><div class='formgrid'><div class='field'><label>Lower Course HCP %</label><input id='lp' type='number' value='"+((trip.scrambleHandicap&&trip.scrambleHandicap.lowerPct)||35)+"'></div><div class='field'><label>Higher Course HCP %</label><input id='hp' type='number' value='"+((trip.scrambleHandicap&&trip.scrambleHandicap.higherPct)||15)+"'></div></div><div class='muted' style='margin-top:8px'>Day 2 scramble team handicap uses the two players' Day 2 course handicaps.</div><button class='btn' id='saveFormula' style='margin-top:12px'>Save Formula</button></div>";
+out+="<div class='card'><button class='btn' id='resetScores' style='background:#fdecec;color:#a11'>Reset All Scores</button></div>";
+document.getElementById("setup").innerHTML=out;
+document.getElementById("saveTripName").onclick=function(){trip.tripName=document.getElementById("tn").value.trim()||"Bro-Am Live Golf";save("/api/trip",trip)};
+document.getElementById("saveGolfers").onclick=function(){trip.players.forEach(function(p){p.name=document.querySelector("[data-name='"+p.id+"']").value.trim()||p.name;p.handicap=Number(document.querySelector("[data-hidx='"+p.id+"']").value)||0});save("/api/trip",trip)};
+document.querySelectorAll("[data-save-course]").forEach(function(b){b.onclick=function(){var day=b.dataset.saveCourse;var course=dayCourse(day);course.name=document.querySelector("[data-coursename='"+day+"']").value.trim();course.par=trip.holes.map(function(h,i){return Number(document.querySelector("[data-par='"+day+"-"+i+"']").value)||4});course.strokeIndex=trip.holes.map(function(h,i){return Number(document.querySelector("[data-si='"+day+"-"+i+"']").value)||i+1});trip.courses[day]=course;trip.players.forEach(function(p){p.courseHandicap=p.courseHandicap||{};p.courseHandicap[day]=Number(document.querySelector("[data-ch='"+day+"-"+p.id+"']").value)||0});save("/api/trip",trip)}});
 document.getElementById("saveFormula").onclick=function(){trip.scrambleHandicap={lowerPct:Number(document.getElementById("lp").value)||35,higherPct:Number(document.getElementById("hp").value)||15};save("/api/trip",trip)};
-document.getElementById("resetScores").onclick=function(){if(!confirm("Reset every score?"))return;fetch("/api/reset-scores",{method:"POST"}).then(function(r){return r.json()}).then(function(x){trip=x;render()})}}
-function save(url,body){return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error("save failed");return r.json()}).then(function(x){trip=x;render();return x})}
+document.getElementById("resetScores").onclick=function(){if(!confirm("Reset every score?"))return;fetch("/api/reset-scores",{method:"POST"}).then(function(r){return r.json()}).then(function(x){trip=normalizeTrip(x);render()})}
+}
+function save(url,body){body=normalizeTrip(body);return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error("save failed");return r.json()}).then(function(x){trip=normalizeTrip(x);render();return x})}
 function render(){document.getElementById("tripNameHead").textContent=trip.tripName||"Bro-Am Live Golf";renderBoard();renderScores();renderSetup();["board","scores","setup"].forEach(function(id){document.getElementById(id).hidden=id!==view});document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("active",b.dataset.view===view)})}
 document.querySelectorAll(".tabs button").forEach(function(b){b.onclick=function(){view=b.dataset.view;render()}});
-fetch("/api/trip",{cache:"no-store"}).then(function(r){return r.json()}).then(function(x){trip=x;render();setInterval(function(){fetch("/api/trip",{cache:"no-store"}).then(function(r){return r.json()}).then(function(x){if(x.revision!==trip.revision){trip=x;render()}})},2000)});
+fetch("/api/trip",{cache:"no-store"}).then(function(r){return r.json()}).then(function(x){trip=normalizeTrip(x);render();setInterval(function(){fetch("/api/trip",{cache:"no-store"}).then(function(r){return r.json()}).then(function(x){if(x.revision!==trip.revision){trip=normalizeTrip(x);render()}})},2000)});
 </script>
 </body></html>
