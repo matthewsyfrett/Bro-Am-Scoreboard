@@ -30,7 +30,7 @@ var trip=null,view="board",game="bestball";
 var gameNames={bestball:"Day 1 · Best Ball",individual1:"Day 1 · Individual",scramble:"Day 2 · Scramble",individual3:"Day 3 · Individual"};
 function blank(){return Array(18).fill(null)}
 function player(id){return trip.players.find(function(p){return p.id===id})}
-function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;"}[c]})}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]})}
 function strokesOnHole(hcp,i){var hc=Math.round(Math.max(0,Number(hcp)||0)),si=Number(trip.holeStrokeIndex&&trip.holeStrokeIndex[i]||i+1),base=Math.floor(hc/18),extra=hc%18;return base+(si<=extra?1:0)}
 function netScore(gross,hcp,i){return Number(gross)-strokesOnHole(hcp,i)}
 function individualTotal(id,g){var a=(trip.scores[g]&&trip.scores[g][id])||blank();if(!a.some(function(v){return v!=null}))return null;var p=player(id);return a.reduce(function(s,v,i){return s+(v==null?0:netScore(v,p.handicap,i))},0)}
