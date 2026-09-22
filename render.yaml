@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: golf-trip-live-scoreboard
+    runtime: node
+    region: ohio
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/trip
