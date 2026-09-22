@@ -16,5 +16,5 @@ app.post("/api/scores",(req,res)=>{
 });
 app.post("/api/reset-scores",(req,res)=>{trip.scores={bestball:{},individual1:{},scramble:{},individual3:{}};trip.revision=(trip.revision||0)+1;save();res.json(trip);});
 app.get("/health",(req,res)=>res.json({ok:true}));
-app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
+app.use((req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
 srv.listen(PORT,()=>console.log("Bro-Am Live Golf on "+PORT));
