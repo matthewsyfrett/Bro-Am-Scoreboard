@@ -1,0 +1,9 @@
+{
+  "name": "live-golf-trip-scoreboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Live mobile-friendly golf trip scoreboard for 8 golfers",
+  "main": "server.js",
+  "scripts": {"start":"node server.js"},
+  "dependencies": {"express":"^5.1.0","socket.io":"^4.8.1"}
+}
