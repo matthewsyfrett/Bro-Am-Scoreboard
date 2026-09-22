@@ -49,42 +49,82 @@
     {
       "id": "p1",
       "name": "Matthew Syfrett",
-      "handicap": 7.3
+      "handicap": 7.3,
+      "courseHandicap": {
+        "day1": 7,
+        "day2": 7,
+        "day3": 7
+      }
     },
     {
       "id": "p2",
       "name": "Keyton Vaughn",
-      "handicap": 8.2
+      "handicap": 8.2,
+      "courseHandicap": {
+        "day1": 8,
+        "day2": 8,
+        "day3": 8
+      }
     },
     {
       "id": "p3",
       "name": "Bryce Melear",
-      "handicap": 7.4
+      "handicap": 7.4,
+      "courseHandicap": {
+        "day1": 7,
+        "day2": 7,
+        "day3": 7
+      }
     },
     {
       "id": "p4",
       "name": "Adam Vigneri",
-      "handicap": 7.3
+      "handicap": 7.3,
+      "courseHandicap": {
+        "day1": 7,
+        "day2": 7,
+        "day3": 7
+      }
     },
     {
       "id": "p5",
       "name": "Drew Shedd",
-      "handicap": 15.1
+      "handicap": 15.1,
+      "courseHandicap": {
+        "day1": 15,
+        "day2": 15,
+        "day3": 15
+      }
     },
     {
       "id": "p6",
       "name": "Alex Matthews",
-      "handicap": 7.9
+      "handicap": 7.9,
+      "courseHandicap": {
+        "day1": 8,
+        "day2": 8,
+        "day3": 8
+      }
     },
     {
       "id": "p7",
       "name": "Lane Smoak",
-      "handicap": 4.1
+      "handicap": 4.1,
+      "courseHandicap": {
+        "day1": 4,
+        "day2": 4,
+        "day3": 4
+      }
     },
     {
       "id": "p8",
       "name": "Frazier Farrell",
-      "handicap": 3.8
+      "handicap": 3.8,
+      "courseHandicap": {
+        "day1": 4,
+        "day2": 4,
+        "day3": 4
+      }
     }
   ],
   "teams": {
@@ -150,5 +190,136 @@
     4,
     4,
     4
-  ]
+  ],
+  "courses": {
+    "day1": {
+      "name": "",
+      "par": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "strokeIndex": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    },
+    "day2": {
+      "name": "",
+      "par": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "strokeIndex": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    },
+    "day3": {
+      "name": "",
+      "par": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "strokeIndex": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    }
+  }
 }
