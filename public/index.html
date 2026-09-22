@@ -7,9 +7,9 @@
 <title>Bro-Am Live Golf</title>
 <style>
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:#f3f6f4;color:#17221b}
-header{background:#0f5132;color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10}.wrap{max-width:1050px;margin:auto}
-.top{display:flex;justify-content:space-between;align-items:end;gap:12px}.brand{font-size:28px;font-weight:900}.sub{font-size:13px;opacity:.82}.live{font-size:12px;border:1px solid #ffffff44;border-radius:99px;padding:7px 9px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6cff9a;margin-right:5px}
-.tabs{display:flex;gap:8px;overflow:auto;margin-top:14px}.tabs button{border:0;border-radius:9px;padding:10px 13px;font-weight:800;background:#ffffff22;color:#fff}.tabs button.active{background:#fff;color:#0f5132}
+header{background:#f7f3ec;color:#17221b;padding:10px 12px 8px;position:sticky;top:0;z-index:10;border-bottom:3px solid #0f5132}.wrap{max-width:1050px;margin:auto}
+.logoWrap{display:flex;justify-content:center;align-items:center;position:relative}.siteLogo{display:block;width:min(100%,760px);height:auto;max-height:180px;object-fit:contain}.tripLabel{text-align:center;font-size:13px;font-weight:800;color:#6b766f;margin:2px 0 8px}.live{position:absolute;right:0;top:8px;font-size:12px;border:0;border-radius:99px;padding:7px 9px;background:#0f5132;color:#fff;font-weight:800}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6cff9a;margin-right:5px}
+.tabs{display:flex;gap:8px;overflow:auto;margin-top:4px;justify-content:center}.tabs button{border:0;border-radius:9px;padding:10px 13px;font-weight:800;background:#0f5132;color:#fff}.tabs button.active{background:#e9efeb;color:#0f5132}
 main{padding:16px}.card{background:#fff;border:1px solid #dfe6e2;border-radius:14px;padding:15px;margin:12px 0;box-shadow:0 2px 8px #0000000a}h2,h3{margin-top:0}
 table{width:100%;border-collapse:collapse}th,td{padding:9px 7px;border-bottom:1px solid #e4e9e6;text-align:left}th:last-child,td:last-child{text-align:right}.net{font-size:18px;font-weight:900;color:#0f5132}.muted{color:#6b766f;font-size:13px}
 .rounds{display:flex;flex-wrap:wrap;gap:6px}.rounds button,.btn{border:0;border-radius:9px;padding:10px 12px;font-weight:800;background:#e9efeb;color:#0f5132}.rounds button.active,.primary{background:#0f5132;color:#fff}
@@ -21,7 +21,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px 7px;border-bottom:1p
 </head>
 <body>
 <header><div class="wrap">
-<div class="top"><div><div class="brand" id="tripNameHead">Bro-Am Live Golf</div><div class="sub">8 golfers · 3 days · all scoring net</div></div><div class="live"><span class="dot"></span>LIVE</div></div>
+<div class="logoWrap"><img class="siteLogo" src="/bro-am-logo-header.jpg" alt="Bro-Am logo"><div class="live"><span class="dot"></span>LIVE</div></div>
+<div class="tripLabel" id="tripNameHead">Bro-Am Live Golf</div>
 <div class="tabs"><button data-view="board" class="active">Leaderboard</button><button data-view="scores">Enter Scores</button><button data-view="setup">Trip Setup</button></div>
 </div></header>
 <main class="wrap"><section id="board"></section><section id="scores" hidden></section><section id="setup" hidden></section></main>
